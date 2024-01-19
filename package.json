@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "description": "",
   "main": "src/index.mjs",
-  "scripts": {},
+  "scripts": {
+    "test": "node --test index.test.mjs"
+  },
   "keywords": [
     "stylelint",
     "stylelint-plugin",
