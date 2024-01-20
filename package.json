@@ -1,5 +1,5 @@
 {
-  "name": "stylelint-no-exist-css-variable",
+  "name": "@talkdesk/stylelint-no-exist-css-variable",
   "private": "true",
   "version": "0.0.1",
   "description": "",
@@ -13,7 +13,7 @@
     "css"
   ],
   "author": "TD-gaowei",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "postcss-value-parser": "^4.2.0",
     "resolve": "^1.22.8"
@@ -22,6 +22,7 @@
     "stylelint": ">=16"
   },
   "devDependencies": {
+    "prettier": "^3.2.4",
     "stylelint-test-rule-node": "^0.2.1"
   }
 }
