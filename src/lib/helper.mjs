@@ -1,7 +1,7 @@
-export const customPropertyReferenceRegExp = /(^|[^\w-])var\([\W\w]+\)/i;
+const customPropertyRegExp = /(^|[^\w-])var\([\W\w]+\)/i;
 
-export const hasCustomPropertyReference = (decl) =>
-	customPropertyReferenceRegExp.test(decl.value);
+export const hasCustomProperty = (decl) =>
+	customPropertyRegExp.test(decl.value);
 
 export function toKebabCase(str) {
 	return str.replace(/([A-Z])/g, "-$1").toLowerCase();

@@ -1,20 +1,13 @@
 import stylelint from "stylelint";
 import valueParser from "postcss-value-parser";
 
-import {
-	convertCustomVars,
-	hasCustomPropertyReference,
-} from "./lib/helper.mjs";
+import { convertCustomVars, hasCustomProperty } from "./lib/helper.mjs";
 
 const ruleName = "@talkdesk/stylelint-no-exist-css-variable";
 
 const meta = {
 	url: "https://github.com/TD-gaowei/stylelint-no-exist-css-variable/blob/main/README.md",
 };
-
-const isMethodEnabled = (method) => method === true;
-
-const isMethodDisabled = (method) => method === null || method === false;
 
 const isVarFunc = (node) =>
 	node.type === "function" &&
@@ -23,14 +16,14 @@ const isVarFunc = (node) =>
 
 const messages = stylelint.utils.ruleMessages(ruleName, {
 	unexpected: (name, prop) =>
-		`not found css variable "${name}" inside declaration "${prop}".`,
+		`Unexpected css variable "${name}" inside user's config.`,
 });
 
 const ruleFunction = (primaryOption, secondaryOptionObject, context) => {
-	const customProperties = convertCustomVars([
-		...Object(secondaryOptionObject)?.words,
-		...Object(secondaryOptionObject)?.ignoreWords,
-	]);
+	const words = secondaryOptionObject?.words || [];
+	const ignoreWords = secondaryOptionObject?.ignoreWords || [];
+
+	const customProperties = convertCustomVars([...words, ...ignoreWords]);
 
 	return (postcssRoot, postcssResult) => {
 		const validOptions = stylelint.utils.validateOptions(
@@ -39,8 +32,14 @@ const ruleFunction = (primaryOption, secondaryOptionObject, context) => {
 			{
 				actual: primaryOption,
 				possible() {
+					return primaryOption === true || primaryOption === null;
+				},
+			},
+			{
+				actual: secondaryOptionObject,
+				possible() {
 					return (
-						isMethodEnabled(primaryOption) || isMethodDisabled(primaryOption)
+						primaryOption === true && typeof secondaryOptionObject === "object"
 					);
 				},
 			},
@@ -49,14 +48,13 @@ const ruleFunction = (primaryOption, secondaryOptionObject, context) => {
 		if (!validOptions) return;
 
 		postcssRoot.walkDecls((decl) => {
-			if (hasCustomPropertyReference(decl)) {
+			if (hasCustomProperty(decl)) {
 				const parsed = valueParser(decl.value);
 
 				parsed.walk((node) => {
 					if (!isVarFunc(node)) return;
 
-					const [propertyNode, , ...fallbacks] = node.nodes;
-					const propertyName = propertyNode.value;
+					const propertyName = node.nodes?.[0]?.value;
 
 					if (customProperties.includes(propertyName)) {
 						return;
@@ -67,7 +65,7 @@ const ruleFunction = (primaryOption, secondaryOptionObject, context) => {
 						node: decl,
 						result: postcssResult,
 						ruleName,
-						word: String(propertyName),
+						word: propertyName,
 					});
 				});
 			}
